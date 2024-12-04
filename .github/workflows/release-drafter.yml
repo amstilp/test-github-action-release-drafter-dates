@@ -34,22 +34,20 @@ jobs:
     - name: Check that release doesn't exist
       id: check-release
       run: |
-        echo ${{ github.repository }}
-        echo ${{ github.repository_owner }}
-        echo ${{ steps.get-version.outputs.version }}
-        export RELEASE_EXISTS=$(gh release list \
+        echo "Checking version ${VERSION}"
+        export NUMBER_OF_RELEASES=$(gh release list \
           --repo ${{ github.repository }} \
           --json tagName \
-          --jq "map(select(.tagName | startswith(\"${{ steps.get-version.outputs.version }}\")))|length" \
+          --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length" \
           )
-        echo $RELEASE_EXISTS
+        echo "Found ${NUMBER_OF_RELEASES} releases"
 
-        # export RELEASE_EXISTS=$(gh release list --json tagName --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length")
-        # if [ $RELEASE_EXISTS -gt 0 ]; then
-        #   echo "Release already exists for version ${version}"
-        #   exit 1
-        # fi
+        if [ $NUMBER_OF_RELEASES -gt 0 ]; then
+          echo "Release already exists for version ${VERSION}"
+          exit 1
+        fi
       env:
+        VERSION: ${{ steps.get-version.outputs.version }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
