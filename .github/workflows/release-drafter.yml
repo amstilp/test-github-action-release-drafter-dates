@@ -39,6 +39,7 @@ jobs:
         export NUMBER_OF_RELEASES=$(gh release list \
           --repo ${{ github.repository }} \
           --json tagName \
+          --exclude-drafts \
           --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length" \
           )
         echo "Found ${NUMBER_OF_RELEASES} releases"
