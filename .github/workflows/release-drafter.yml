@@ -1,0 +1,96 @@
+name: Release Drafter
+
+on:
+  push:
+    # branches to consider in the event; optional, defaults to all
+    branches:
+      - main
+  # pull_request event is required only for autolabeler
+  pull_request:
+    # Only following types are handled by the action, but one can default to all as well
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  update_release_draft:
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Get current date
+      id: get-date
+      run: |
+          export CURRENT_DATE=$(TZ=":America/Los_Angeles" date "+%Y-%m-%d")
+          echo ::set-output name=current_date::${CURRENT_DATE}
+          echo "Current date set to ${CURRENT_DATE}"
+
+    - name: Get number of releases for the current date
+      id: get-release-count
+      run: |
+        export RELEASE_COUNT=$(gh release list \
+          --repo ${{ github.repository }} \
+          --json tagName \
+          --exclude-drafts \
+          --jq "map(select(.tagName | startswith(\"${CURRENT_DATE}\")))|length" \
+          )
+        echo ::set-output name=release_count::${RELEASE_COUNT}
+        echo "Found ${RELEASE_COUNT} releases"
+      env:
+        CURRENT_DATE: ${{ steps.get-date.outputs.current_date }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Prepare release version
+      id: get-version
+      run: |
+          export VERSION="${CURRENT_DATE}"
+
+          if [ $RELEASE_COUNT -gt 0 ]; then
+            echo "Release already exists for version ${VERSION}"
+            echo "Appending release count to version"
+            export VERSION="${CURRENT_DATE}-${RELEASE_COUNT}"
+          fi
+
+          echo ::set-output name=version::${VERSION}
+          echo "Version set to ${VERSION}"
+      env:
+        CURRENT_DATE: ${{ steps.get-date.outputs.current_date }}
+        RELEASE_COUNT: ${{ steps.get-release-count.outputs.release_count }}
+
+
+    - name: Check that version doesn't exist
+      id: check-release
+      run: |
+        echo "Checking version ${VERSION}"
+
+        export CHECK=$(gh release list \
+          --repo ${{ github.repository }} \
+          --json tagName \
+          --exclude-drafts \
+          --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length" \
+          )
+        echo "Found ${CHECK} releases"
+
+        if [ $CHECK -gt 0 ]; then
+          echo "Release already exists for version ${VERSION}"
+          exit 1
+        fi
+      env:
+        VERSION: ${{ steps.get-version.outputs.version }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+    - uses: release-drafter/release-drafter@v6
+      with:
+        commitish: main
+        tag: ${{ steps.get-version.outputs.version }}
+        name: ${{ steps.get-version.outputs.version }}
+        version: ${{ steps.get-version.outputs.version }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
