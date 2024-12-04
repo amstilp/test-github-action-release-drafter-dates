@@ -36,13 +36,17 @@ jobs:
       run: |
         echo ${{ github.repository }}
         echo ${{ github.repository_owner }}
-        gh release list \
+        echo ${{ steps.get-version.outputs.version }}
+        export RELEASE_EXISTS=$(gh release list \
           --repo ${{ github.repository }} \
           --json tagName \
-          --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length"
+          --jq "map(select(.tagName | startswith(\"${{ steps.get-version.outputs.version }}\")))|length" \
+          )
+        echo $RELEASE_EXISTS
+
         # export RELEASE_EXISTS=$(gh release list --json tagName --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length")
         # if [ $RELEASE_EXISTS -gt 0 ]; then
-        #   echo "Release already exists for version ${VERSION}"
+        #   echo "Release already exists for version ${version}"
         #   exit 1
         # fi
       env:
