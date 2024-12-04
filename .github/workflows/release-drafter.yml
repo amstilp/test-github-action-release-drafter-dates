@@ -110,7 +110,7 @@ jobs:
 
     - uses: release-drafter/release-drafter@v6
       with:
-        commitish: ${{ github.sha }}
+        commitish: main
         tag: ${{ steps.get-version.outputs.version }}
         name: ${{ steps.get-version.outputs.version }}
         version: ${{ steps.get-version.outputs.version }}
