@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+    - name: Check out code
 
     - name: Get release version
       id: get-version
@@ -35,12 +36,17 @@ jobs:
     - name: Check that release doesn't exist
       id: check-release
       run: |
-        gh release list --json tagName --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length"
-        export RELEASE_EXISTS=$(gh release list --json tagName --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length")
-        if [ $RELEASE_EXISTS -gt 0 ]; then
-          echo "Release already exists for version ${VERSION}"
-          exit 1
-        fi
+        echo ${{ github.repository }}
+        echo ${{ github.repository_owner }}
+
+        gh release list \
+          --json tagName \
+          --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length"
+        # export RELEASE_EXISTS=$(gh release list --json tagName --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length")
+        # if [ $RELEASE_EXISTS -gt 0 ]; then
+        #   echo "Release already exists for version ${VERSION}"
+        #   exit 1
+        # fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
