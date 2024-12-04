@@ -46,7 +46,6 @@ jobs:
 
 
     - uses: release-drafter/release-drafter@v6
-      requires: check-release
       with:
         tag: ${{ steps.get-version.outputs.version }}
         name: ${{ steps.get-version.outputs.version }}
