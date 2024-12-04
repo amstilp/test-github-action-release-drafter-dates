@@ -24,27 +24,60 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Get release version
+    - name: Get current date
+      id: get-date
+      run: |
+          export CURRENT_DATE=$(TZ=":America/Los_Angeles" date "+%Y-%m-%d")
+          echo ::set-output name=current_date::${CURRENT_DATE}
+          echo "Current date set to ${CURRENT_DATE}"
+
+    - name: Get number of releases for the current date
+      id: get-release-count
+      run: |
+        export RELEASE_COUNT=$(gh release list \
+          --repo ${{ github.repository }} \
+          --json tagName \
+          --exclude-drafts \
+          --jq "map(select(.tagName | startswith(\"${CURRENT_DATE}\")))|length" \
+          )
+        echo ::set-output name=release_count::${RELEASE_COUNT}
+        echo "Found ${RELEASE_COUNT} releases"
+      env:
+        CURRENT_DATE: ${{ steps.get-date.outputs.current_date }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Prepare release version
       id: get-version
       run: |
-          export VERSION=$(TZ=":America/Los_Angeles" date "+%Y-%m-%d")
+          export VERSION="${CURRENT_DATE}"
+
+          if [ $RELEASE_COUNT -gt 0 ]; then
+            echo "Release already exists for version ${VERSION}"
+            echo "Appending release count to version"
+            export VERSION="${CURRENT_DATE}-${RELEASE_COUNT}"
+          fi
+
           echo ::set-output name=version::${VERSION}
           echo "Version set to ${VERSION}"
+      env:
+        CURRENT_DATE: ${{ steps.get-date.outputs.current_date }}
+        RELEASE_COUNT: ${{ steps.get-release-count.outputs.release_count }}
 
-    - name: Check that release doesn't exist
+
+    - name: Check that version doesn't exist
       id: check-release
       run: |
         echo "Checking version ${VERSION}"
 
-        export NUMBER_OF_RELEASES=$(gh release list \
+        export CHECK=$(gh release list \
           --repo ${{ github.repository }} \
           --json tagName \
           --exclude-drafts \
           --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length" \
           )
-        echo "Found ${NUMBER_OF_RELEASES} releases"
+        echo "Found ${CHECK} releases"
 
-        if [ $NUMBER_OF_RELEASES -gt 0 ]; then
+        if [ $CHECK -gt 0 ]; then
           echo "Release already exists for version ${VERSION}"
           exit 1
         fi
