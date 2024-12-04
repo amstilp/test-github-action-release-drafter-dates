@@ -37,6 +37,7 @@ jobs:
         echo ${{ github.repository }}
         echo ${{ github.repository_owner }}
         gh release list \
+          --repo ${{ github.repository }} \
           --json tagName \
           --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length"
         # export RELEASE_EXISTS=$(gh release list --json tagName --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length")
