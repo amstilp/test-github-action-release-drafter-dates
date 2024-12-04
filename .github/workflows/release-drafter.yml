@@ -24,8 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Check out code
-
     - name: Get release version
       id: get-version
       run: |
