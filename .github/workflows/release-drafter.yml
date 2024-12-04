@@ -28,7 +28,7 @@ jobs:
       id: get-date
       run: |
           export CURRENT_DATE=$(TZ=":America/Los_Angeles" date "+%Y-%m-%d")
-          echo ::set-output name=current_date::${CURRENT_DATE}
+          echo "current_date=${CURRENT_DATE}" >> $GITHUB_OUTPUT
           echo "Current date set to ${CURRENT_DATE}"
 
     - name: Get number of releases for the current date
@@ -40,7 +40,7 @@ jobs:
           --exclude-drafts \
           --jq "map(select(.tagName | startswith(\"${CURRENT_DATE}\")))|length" \
           )
-        echo ::set-output name=release_count::${RELEASE_COUNT}
+        echo "release_count=${RELEASE_COUNT" >> $GITHUB_OUTPUT
         echo "Found ${RELEASE_COUNT} releases"
       env:
         CURRENT_DATE: ${{ steps.get-date.outputs.current_date }}
@@ -57,7 +57,7 @@ jobs:
             export VERSION="${CURRENT_DATE}-${RELEASE_COUNT}"
           fi
 
-          echo ::set-output name=version::${VERSION}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Version set to ${VERSION}"
       env:
         CURRENT_DATE: ${{ steps.get-date.outputs.current_date }}
