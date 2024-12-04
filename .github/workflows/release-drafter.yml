@@ -85,10 +85,32 @@ jobs:
         VERSION: ${{ steps.get-version.outputs.version }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Check that tag doesn't exist
+      id: check-tag
+      run: |
+        echo "Checking tag for version ${VERSION}"
+
+        # Query the API for this tag.
+        export CHECK=$(gh api \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /repos/${{ github.repository }}/tags \
+          --jq "map(select(.name | startswith(\"2024-12-04\")))|length" \
+        )
+        echo "Found ${CHECK} tags"
+
+        if [ $CHECK -gt 0 ]; then
+          echo "Tag already exists for version ${VERSION}"
+          exit 1
+        fi
+      env:
+        VERSION: ${{ steps.get-version.outputs.version }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
     - uses: release-drafter/release-drafter@v6
       with:
-        commitish: ${{ github.sha }}
+        commitish: main
         tag: ${{ steps.get-version.outputs.version }}
         name: ${{ steps.get-version.outputs.version }}
         version: ${{ steps.get-version.outputs.version }}
