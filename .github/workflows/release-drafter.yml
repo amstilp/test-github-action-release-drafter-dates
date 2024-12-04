@@ -35,6 +35,7 @@ jobs:
     - name: Check that release doesn't exist
       id: check-release
       run: |
+        gh release list --json tagName --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length"
         export RELEASE_EXISTS=$(gh release list --json tagName --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length")
         if [ $RELEASE_EXISTS -gt 0 ]; then
           echo "Release already exists for version ${VERSION}"
@@ -45,6 +46,7 @@ jobs:
 
 
     - uses: release-drafter/release-drafter@v6
+      requires: check-release
       with:
         tag: ${{ steps.get-version.outputs.version }}
         name: ${{ steps.get-version.outputs.version }}
