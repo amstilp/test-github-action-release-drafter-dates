@@ -28,7 +28,7 @@ jobs:
     - name: Get release version
       id: get-version
       run: |
-          export VERSION=$(date "+%Y-%m-%d")
+          export VERSION=$(TZ=":America/Los_Angeles" date "+%Y-%m-%d")
           echo ::set-output name=version::${VERSION}
           echo "Version set to ${VERSION}"
 
