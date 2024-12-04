@@ -44,6 +44,7 @@ jobs:
 
     - uses: release-drafter/release-drafter@v5
       with:
+        commitish: main
         tag: ${{ steps.get-version.outputs.version }}
         name: ${{ steps.get-version.outputs.version }}
         version: ${{ steps.get-version.outputs.version }}
