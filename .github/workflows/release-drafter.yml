@@ -36,10 +36,6 @@ jobs:
       run: |
         echo "Checking version ${VERSION}"
 
-        gh release list \
-          --repo ${{ github.repository }} \
-          --json tagName
-
         export NUMBER_OF_RELEASES=$(gh release list \
           --repo ${{ github.repository }} \
           --json tagName \
