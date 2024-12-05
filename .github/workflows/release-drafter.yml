@@ -73,7 +73,7 @@ jobs:
           --repo ${{ github.repository }} \
           --json tagName \
           --exclude-drafts \
-          --jq "map(select(.tagName | startswith(\"${VERSION}\")))|length" \
+          --jq "map(select(.tagName == \"${VERSION}\"))|length" \
           )
         echo "Found ${CHECK} releases"
 
@@ -95,7 +95,7 @@ jobs:
           -H "Accept: application/vnd.github+json" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           /repos/${{ github.repository }}/tags \
-          --jq "map(select(.name | startswith(\"2024-12-04\")))|length" \
+          --jq "map(select(.name  == \"${VERSION}\"))|length" \
         )
         echo "Found ${CHECK} tags"
 
