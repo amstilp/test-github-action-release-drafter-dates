@@ -4,7 +4,7 @@ on:
   push:
     # branches to consider in the event; optional, defaults to all
     branches:
-      - main
+      - deploy/production
   # pull_request event is required only for autolabeler
   pull_request:
     # Only following types are handled by the action, but one can default to all as well
@@ -110,7 +110,7 @@ jobs:
 
     - uses: release-drafter/release-drafter@v6
       with:
-        commitish: main
+        commitish: deploy/production
         tag: ${{ steps.get-version.outputs.version }}
         name: ${{ steps.get-version.outputs.version }}
         version: ${{ steps.get-version.outputs.version }}
