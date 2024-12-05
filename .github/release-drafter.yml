@@ -1,7 +1,10 @@
 categories:
-  - title: "Dependabot"
+  - title: "⬆️ Dependencies"
     labels:
       - "dependencies"
+      - "update-requirements-files"
+      - "combined-pr"
+
 template: |
   ## What’s Changed
 
