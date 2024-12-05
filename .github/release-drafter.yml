@@ -1,9 +1,18 @@
 categories:
+  - title: "🔧 Maintenance"
+    labels:
+      - "maintenance"
+
   - title: "⬆️ Dependencies"
     labels:
       - "dependencies"
       - "update-requirements-files"
       - "combined-pr"
+
+autolabeler:
+  - label: "maintenance"
+    branch:
+      - '/maint\/.+/'
 
 template: |
   ## What’s Changed
