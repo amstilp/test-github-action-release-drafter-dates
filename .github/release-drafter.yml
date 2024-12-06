@@ -1,3 +1,5 @@
+sort-direction: ascending
+
 categories:
   - title: "⬆️ Dependencies"
     labels:
